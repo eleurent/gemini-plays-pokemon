@@ -38,7 +38,7 @@ class GeminiAgent():
         'B',
         'START',
     )
-    max_history_len: int = 10
+    max_history_len: int = 3
 
     def __post_init__(self):
         google_api_key = os.environ.get('GOOGLE_API_KEY', None)
@@ -51,10 +51,13 @@ class GeminiAgent():
     def act(self, frame):
         frame = PIL.Image.fromarray(frame)
         contents = self.prompt(frame)
-        response = self.model.generate_content(contents)
-        self.frames_history.append(frame)
-        self.responses_history.append(response.text)
-        return self.parse(response), response.text
+        try:
+            response = self.model.generate_content(contents)
+            self.frames_history.append(frame)
+            self.responses_history.append(response.text)
+            return self.parse(response), response.text
+        except Exception as e:
+            return self.valid_actions.index('A'), f"Error: {e}"
     
     def parse(self, response):
         action = response.text.split('Action: ')[1].strip()
