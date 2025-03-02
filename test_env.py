@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-ep_length = 2048 * 80
+ep_length = 30
 sess_id = "runs"
 sess_path = Path(sess_id)
 
@@ -18,8 +18,8 @@ env_config = {
   'init_state': None,
   'max_steps': ep_length, 
   'print_rewards': True,
-  'save_video': False,
-  'fast_video': False,
+  'save_video': True,
+  'fast_video': True,
   'session_path': sess_path,
   'gb_path': 'pokemon_red.gb',
   'debug': False,
@@ -32,10 +32,12 @@ env = pokemon_env.RedGymEnv(env_config)
 agent = gemini.GeminiAgent()
 observation, info = env.reset()
 
-for i in range(100):
+truncated, step = False, 0
+while not truncated:
+    step += 1
     action, response = agent.act(observation['screens'][..., 0])
     print(response)
     observation, reward, done, truncated, info = env.step(action)
     env.render()
-    print(f"Step: {i}, Reward: {reward}, Done: {done}")
+    print(f"Step: {step}, Reward: {reward}, Done: {truncated}")
 env.close()
