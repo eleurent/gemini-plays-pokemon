@@ -1,7 +1,6 @@
 from pathlib import Path
 from pokemon_env import pokemon_env
 from gemini_agent import gemini
-import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 import time
 

@@ -3,3 +3,4 @@ pyboy
 gymnasium
 mediapy
 einops
+python-dotenv
