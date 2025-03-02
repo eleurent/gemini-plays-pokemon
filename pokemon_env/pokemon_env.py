@@ -28,6 +28,7 @@ class RedGymEnv(Env):
         self.headless = config["headless"]
         self.init_state = config["init_state"]
         self.action_duration = config["action_duration"]
+        self.frame_ticks = 24
         self.max_steps = config["max_steps"]
         self.save_video = config["save_video"]
         self.fast_video = config["fast_video"]
@@ -250,10 +251,13 @@ class RedGymEnv(Env):
         press_step = 8
         self.pyboy.tick(press_step, render_screen)
         self.pyboy.send_input(self.release_actions[action])
-        self.pyboy.tick(self.action_duration - press_step - 1, render_screen)
-        self.pyboy.tick(1, True)
-        if self.save_video and self.fast_video:
-            self.add_video_frame()
+        all_ticks = [self.frame_ticks] * (self.action_duration // self.frame_ticks)
+        all_ticks[0] -= press_step
+        for ticks in all_ticks:
+            self.pyboy.tick(ticks - 1, render_screen)
+            self.pyboy.tick(1, True)
+            if self.save_video:
+                self.add_video_frame()
         
     def append_agent_stats(self, action):
         x_pos, y_pos, map_n = self.get_game_coords()
