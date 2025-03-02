@@ -10,12 +10,12 @@ env_config = {
   'headless': False, 
   'save_final_state': False, 
   'early_stop': False,
-  'action_freq': 5000,
+  'action_duration': 5000,
   'init_state': None,
   'max_steps': ep_length, 
   'print_rewards': True,
   'save_video': False,
-  'fast_video': True,
+  'fast_video': False,
   'session_path': sess_path,
   'gb_path': 'pokemon_red.gb',
   'debug': False,
@@ -27,7 +27,7 @@ env_config = {
 env = pokemon_env.RedGymEnv(env_config)
 observation, info = env.reset()
 
-for i in range(2):
+for i in range(100):
     action = env.action_space.sample()
     observation, reward, done, truncated, info = env.step(action)
     env.render()

@@ -3,12 +3,11 @@ import json
 from pathlib import Path
 
 import numpy as np
-from skimage.transform import downscale_local_mean
 import matplotlib.pyplot as plt
 from pyboy import PyBoy
 #from pyboy.logger import log_level
 import mediapy as media
-from einops import repeat
+import einops
 
 from gymnasium import Env, spaces
 from pyboy.utils import WindowEvent
@@ -28,7 +27,7 @@ class RedGymEnv(Env):
         self.print_rewards = config["print_rewards"]
         self.headless = config["headless"]
         self.init_state = config["init_state"]
-        self.act_freq = config["action_freq"]
+        self.action_duration = config["action_duration"]
         self.max_steps = config["max_steps"]
         self.save_video = config["save_video"]
         self.fast_video = config["fast_video"]
@@ -108,7 +107,6 @@ class RedGymEnv(Env):
 
         head = "null" if config["headless"] else "SDL2"
 
-        #log_level("ERROR")
         self.pyboy = PyBoy(
             config["gb_path"],
             #debugging=False,
@@ -252,7 +250,7 @@ class RedGymEnv(Env):
         press_step = 8
         self.pyboy.tick(press_step, render_screen)
         self.pyboy.send_input(self.release_actions[action])
-        self.pyboy.tick(self.act_freq - press_step - 1, render_screen)
+        self.pyboy.tick(self.action_duration - press_step - 1, render_screen)
         self.pyboy.tick(1, True)
         if self.save_video and self.fast_video:
             self.add_video_frame()
@@ -364,7 +362,7 @@ class RedGymEnv(Env):
                 c[0]-self.coords_pad:c[0]+self.coords_pad,
                 c[1]-self.coords_pad:c[1]+self.coords_pad
             ]
-        return repeat(out, 'h w -> (h h2) (w w2)', h2=2, w2=2)
+        return einops.repeat(out, 'h w -> (h h2) (w w2)', h2=2, w2=2)
     
     def update_recent_screens(self, cur_screen):
         self.recent_screens = np.roll(self.recent_screens, 1, axis=2)
@@ -574,3 +572,5 @@ class RedGymEnv(Env):
         else:
             return -1
     
+    def close(self):
+        self.pyboy.stop()
