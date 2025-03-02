@@ -3,10 +3,11 @@ from pokemon_env import pokemon_env
 from gemini_agent import gemini
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
-ep_length = 30
+ep_length = 1000
 sess_id = "runs"
 sess_path = Path(sess_id)
 
@@ -32,6 +33,7 @@ env = pokemon_env.RedGymEnv(env_config)
 agent = gemini.GeminiAgent()
 observation, info = env.reset()
 
+start_time = time.time()
 truncated, step = False, 0
 while not truncated:
     step += 1
@@ -39,5 +41,8 @@ while not truncated:
     print(response)
     observation, reward, done, truncated, info = env.step(action)
     env.render()
-    print(f"Step: {step}, Reward: {reward}, Done: {truncated}")
+    elapsed_time = time.time() - start_time
+    hours, rem = divmod(elapsed_time, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print(f"Step: {step}, Reward: {reward}, Done: {truncated}, Time Elapsed: {int(hours):02}:{int(minutes):02}:{int(seconds):02}")
 env.close()
