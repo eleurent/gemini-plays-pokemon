@@ -1,6 +1,10 @@
 from pathlib import Path
 from pokemon_env import pokemon_env
+from gemini_agent import gemini
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ep_length = 2048 * 80
 sess_id = "runs"
@@ -10,7 +14,7 @@ env_config = {
   'headless': False, 
   'save_final_state': False, 
   'early_stop': False,
-  'action_duration': 5000,
+  'action_duration': 1000,
   'init_state': None,
   'max_steps': ep_length, 
   'print_rewards': True,
@@ -25,16 +29,13 @@ env_config = {
 }
 
 env = pokemon_env.RedGymEnv(env_config)
+agent = gemini.GeminiAgent()
 observation, info = env.reset()
 
 for i in range(100):
-    action = env.action_space.sample()
+    action = agent.act(observation['screens'][..., 0])
+    print(agent.valid_actions[action])
     observation, reward, done, truncated, info = env.step(action)
     env.render()
     print(f"Step: {i}, Reward: {reward}, Done: {done}")
 env.close()
-
-
-print(observation['screens'].shape)
-plt.imshow(observation['screens'][...,0], cmap='gray')
-plt.show()
