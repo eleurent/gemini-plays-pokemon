@@ -33,8 +33,8 @@ agent = gemini.GeminiAgent()
 observation, info = env.reset()
 
 for i in range(100):
-    action = agent.act(observation['screens'][..., 0])
-    print(agent.valid_actions[action])
+    action, response = agent.act(observation['screens'][..., 0])
+    print(response)
     observation, reward, done, truncated, info = env.step(action)
     env.render()
     print(f"Step: {i}, Reward: {reward}, Done: {done}")
