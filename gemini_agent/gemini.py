@@ -5,14 +5,22 @@ import PIL.Image
 import collections
 
 
-PROMPT_PREFIX = """You are playing Pokemon Red. Use the default player names, don't use a custom name."""
+PROMPT_PREFIX = """You are playing Pokemon Red. Use the default player names, don't use a custom name. """
 
-PROMPT = """You have access to the following actions:
+HISTORY_PROMPT = """
+ALSO, here is the history of your previous actions:
+"""
+
+PROMPT = """
+NOW HERE IS THE SITUATION.
+You have access to the following actions:
 
 [A, B, UP, DOWN, LEFT, RIGHT]
 
 What is your next action? Start with a justification, and then reply in this format:
 Action: <the_action>
+
+(If you notice that you played the same action multiple times without success, maybe try a different action).
 """
 
 
@@ -50,10 +58,11 @@ class GeminiAgent():
     
     def parse(self, response):
         action = response.text.split('Action: ')[1].strip()
+        if action not in self.valid_actions:
+            action = 'A'
         return self.valid_actions.index(action)
     
     def prompt(self, frame):
-        user_prompts = [PROMPT] * len(self.frames_history)
-        turns = list(zip(self.frames_history, user_prompts, self.responses_history))
+        turns = list(zip(self.frames_history, self.responses_history))
         flattened_turns = tuple([item for sublist in turns for item in sublist])
-        return (PROMPT_PREFIX,) + flattened_turns + (frame, PROMPT)
+        return (PROMPT_PREFIX,) + (frame, PROMPT, HISTORY_PROMPT) + flattened_turns + (PROMPT, frame)
